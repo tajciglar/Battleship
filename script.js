@@ -29,19 +29,21 @@ class Gameboard {
         this.ships.push(ship);
         if(isHorizantal === true){
             for(let i = 0; i < ship.length; i++){
-                this.board[x][y] = 1;
+                this.board[x][y] = ship;
                 y += 1;
             }
         } else {
             for(let i = 0; i < ship.length; i++){
-                this.board[x][y] = 1;
+                this.board[x][y] = ship;
                 x += 1;
             }
         }
     }
 
-    recieveAttack(){
-        
+    recieveAttack(x, y){
+        if (this.board[x][y] !== 0){
+            this.board[x][y].hits += 1;
+        }
     }
 }
 
