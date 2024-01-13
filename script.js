@@ -21,7 +21,7 @@ function Ship(length, hits = 0, sunken = false){
 // Create a battlefield
 class Gameboard {
     constructor(){
-        this.board = Array.from({length: 10}, () => Array(10).fill(0));
+        this.board = Array.from({length: 10}, () => Array(10).fill(null));
         this.ships = [];
     }
 
@@ -41,9 +41,19 @@ class Gameboard {
     }
 
     recieveAttack(x, y){
-        if (this.board[x][y] !== 0){
-            this.board[x][y].hits += 1;
+        if(this.board[x][y] !== 1 && this.board[x][y] !== 0){
+            if (this.board[x][y] !== null){
+                this.board[x][y].hit();
+                if (this.board[x][y].sunken === true){
+                    this.board[x][y] = 1;
+                    return true;
+                }
+                this.board[x][y] = 1;
+            } else {
+                this.board[x][y] = 0;
+            }
         }
+        return false;
     }
 }
 
