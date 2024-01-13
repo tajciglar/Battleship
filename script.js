@@ -1,4 +1,4 @@
-export {Ship, Gameboard, Player};
+export {Ship, Gameboard};
 
 //  Create a battleship
 function Ship(length, hits = 0, sunken = false){
@@ -40,24 +40,36 @@ class Gameboard {
         }
     }
 
-    recieveAttack(x, y){
+    recieveAttack(x, y, currentPlayer){
         if(this.board[x][y] !== 1 && this.board[x][y] !== 0){
+            // If ship is hit
             if (this.board[x][y] !== null){
                 this.board[x][y].hit();
                 if (this.board[x][y].sunken === true){
                     this.board[x][y] = 1;
-                    return true;
+                    this.ships.pop(); // Remove a ship from the array of ships
+                    if(this.ships.length === 0){
+                        return "All ship sunken";
+                    }
+                    return "Ship is destroyed";
                 }
-                this.board[x][y] = 1;
+                this.board[x][y] = 1; // Mark with 1 if its a hit
             } else {
-                this.board[x][y] = 0;
+                this.board[x][y] = 0; // Mark with 0 if its a miss
+                this.Player(currentPlayer);
             }
         }
         return false;
     }
-}
 
-// Create a player
-function Player(){
+    Player(currentPlayer){
+        if(currentPlayer === "computer"){
+            this.recieveAttack(0, 1, "player");
+        }else{
+            //recieveAttack(, , "computer")
+            this.recieveAttack(0, 1, "computer");
+        }
+    }
     
 }
+

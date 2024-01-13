@@ -1,4 +1,4 @@
-import { Ship, Gameboard, Player } from "./script";
+import { Ship, Gameboard } from "./script";
 
 test('Ship length', () => {
     const ship = Ship(5);
@@ -16,7 +16,7 @@ test('Ship is sunk', () => {
     ship.hit();
     ship.hit();
     expect(ship.sunken).toBe(true);
-})
+});
 
 test('Ship is placed', () => {
     const ship1 = Ship(3);
@@ -24,8 +24,7 @@ test('Ship is placed', () => {
     const gameboard1 = new Gameboard();
     gameboard1.placeShip(ship1, 0, 1, true)
     gameboard1.placeShip(ship2, 2, 2, false)
-   
-})
+});
 
 test('Ship is hit', () => {
     const ship1 = Ship(3);
@@ -33,7 +32,7 @@ test('Ship is hit', () => {
     gameboard1.placeShip(ship1, 0, 1, true);
     gameboard1.recieveAttack(0, 1);
     expect(ship1.hits).toBe(1); 
-})
+});
 
 test('Same coordinates fail', () => {
     const ship1 = Ship(3);
@@ -41,7 +40,7 @@ test('Same coordinates fail', () => {
     gameboard1.placeShip(ship1, 0, 1, true);
     gameboard1.recieveAttack(0, 1);
     expect(gameboard1.recieveAttack(0,1)).toBe(false); 
-})
+});
 
 test('Ship is destroyed', () => {
     const ship1 = Ship(3);
@@ -51,5 +50,23 @@ test('Ship is destroyed', () => {
     gameboard1.placeShip(ship1, 3, 3, true);
     gameboard1.recieveAttack(0, 1);
     gameboard1.recieveAttack(0, 2);
-    expect(gameboard1.recieveAttack(0, 3)).toBe(true);
-})
+    expect(gameboard1.recieveAttack(0, 3)).toBe("Ship is destroyed");
+});
+
+test('All ships sunken', () => {
+    const ship1 = Ship(3);
+    const gameboard1 = new Gameboard();
+    gameboard1.placeShip(ship1, 0, 1, true);
+    gameboard1.recieveAttack(0, 1);
+    gameboard1.recieveAttack(0, 2);
+    expect(gameboard1.recieveAttack(0, 3)).toBe("All ship sunken");
+});
+
+test('Player is switched to computer after a miss', () => {
+    const ship1 = Ship(3);
+    const gameboard1 = new Gameboard();
+    gameboard1.placeShip(ship1, 0, 1, true);
+    gameboard1.Player = jest.fn();
+    gameboard1.recieveAttack(0, 5, "player");
+    expect(gameboard1.Player).toHaveBeenCalledWith("player");
+});
