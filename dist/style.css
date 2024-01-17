@@ -1,0 +1,26 @@
+html, body {
+    height: 100vh;
+    width: 100%;
+    margin: 0;
+}
+
+#gameboardContainer {
+    display: flex;
+    justify-content: space-evenly;
+    width: 100%;
+    height: 100%;
+}
+
+#middleBoard {
+    width: 20%;
+}
+
+.row{
+    display: flex;
+}
+
+.block {
+    border: solid 2px black;
+    width: 50px;
+    height: 50px;
+}
