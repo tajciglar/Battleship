@@ -36,6 +36,15 @@ function createGameboard(gameboard, number) {
         gameboardDiv.classList.add('gameboard1');
         const middleBoard = document.createElement('div');
         middleBoard.setAttribute('id', 'middleBoard');
+
+        const messageVertical = document.createElement('div');
+        messageVertical.textContent = "Click here to turn boat vertical";
+        const checkbox = document.createElement('input')
+        checkbox.setAttribute('type', 'checkbox');
+        checkbox.setAttribute('id', 'checkbox');
+        middleBoard.appendChild(messageVertical);
+        messageVertical.appendChild(checkbox);
+
         gameboardContainer.appendChild(middleBoard);
         ships = createShips();
     } else if (number === 2) {
@@ -82,7 +91,6 @@ function createShips(){
 
 
 function placeShips(block, gameboard, ships) {
-    console.log(ships);
     const instructions = document.getElementById('instructions');
     
     if (instructions.childNodes.length <= 2) {
@@ -90,14 +98,6 @@ function placeShips(block, gameboard, ships) {
         message.textContent = "Place ships on the gameboard";
         instructions.appendChild(message);
     }
-
-    /*
-        const messageVertical = document.createElement('div');
-        messageVertical.textContent = "Click here to turn boat vertical";
-        const checkbox = document.createElement('input')
-         checkbox.setAttribute('type', 'checkbox');
-    */ 
-    
    
     const x = block.getAttribute('value');
     const y = block.parentNode.getAttribute('value');
@@ -105,12 +105,26 @@ function placeShips(block, gameboard, ships) {
     const shipSize = ships[0].length;
 
     for (let i = 0; i < shipSize; i++) {
-       
-        const currentBlock = block.parentNode.querySelector(`[value="${parseInt(x) + i}"]`);
+        const checkbox = document.getElementById('checkbox'); // Move inside the loop to get the updated value
+
+        let currentX, currentY;
+
+        if (!checkbox.checked) {
+            currentX = parseInt(x) + i;
+            currentY = parseInt(y);
+        } else {
+            currentX = parseInt(x);
+            currentY = parseInt(y) + i;
+        }
+
+        const currentBlock = document.querySelector(`.row[value="${currentY}"] .block[value="${currentX}"]`);
         currentBlock.style.cssText = 'background-color: blue;';
+        gameboard.placeShip(ships[0], currentX, currentY, !checkbox.checked);
     }
 
-    gameboard.placeShip(ships[0], x, y, true);
-
     ships.shift();
+}
+
+function {
+    
 }
