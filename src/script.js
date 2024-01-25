@@ -10,8 +10,9 @@ playButton.addEventListener("click", () =>{
     const playerGameboard = new Gameboard();
     const computerGameboard = new Gameboard();
 
+    const instructions = document.getElementById('instructions');
     // Remove play button
-    playButton.remove();
+    instructions.remove();
 
     // Create container for gameboards
     const main = document.getElementById('main');
@@ -34,6 +35,7 @@ function createGameboard(gameboard, number) {
 
     if (number === 1) {
         gameboardDiv.classList.add('gameboard1');
+        gameboardDiv.setAttribute('id', 'gameboard1');
         const middleBoard = document.createElement('div');
         middleBoard.setAttribute('id', 'middleBoard');
 
@@ -49,11 +51,13 @@ function createGameboard(gameboard, number) {
         ships = createShips();
     } else if (number === 2) {
         gameboardDiv.classList.add('gameboard2');
+        gameboardDiv.setAttribute('id', 'gameboard2');
+        ships = createShips();
+        computerPlaceShips(gameboard, ships);
     }
     
     let rowNumber = 0;
     gameboard.board.forEach((array) => {
-       
         const newRow = document.createElement('div');
         newRow.setAttribute('value', rowNumber);
         newRow.setAttribute('class', 'row');
@@ -74,13 +78,9 @@ function createGameboard(gameboard, number) {
             }
         });
     });
-
-    if(number === 2){
-        
-        placeShips();
-    }
 }
 
+// Create ships
 function createShips(){
 
     const shipLengths = [1, 2, 3, 4, 5];
@@ -89,42 +89,165 @@ function createShips(){
     return ships;
 }
 
-
+/// Place a single ship when the user clicks on a block
 function placeShips(block, gameboard, ships) {
-    const instructions = document.getElementById('instructions');
-    
-    if (instructions.childNodes.length <= 2) {
+    const middleBoard = document.getElementById('middleBoard');
+    const errorMessage = document.createElement('p');
+
+    if (middleBoard.childNodes.length <= 2) {
         const message = document.createElement('p');
         message.textContent = "Place ships on the gameboard";
-        instructions.appendChild(message);
+        middleBoard.appendChild(message);
     }
-   
-    const x = block.getAttribute('value');
-    const y = block.parentNode.getAttribute('value');
 
+    const x = block.parentNode.getAttribute('value');
+    const y = block.getAttribute('value');
+    
     const shipSize = ships[0].length;
 
-    for (let i = 0; i < shipSize; i++) {
-        const checkbox = document.getElementById('checkbox'); // Move inside the loop to get the updated value
+    const checkbox = document.getElementById('checkbox');
+    
+    // Clear previous error messages
+    errorMessage.textContent = '';
+    middleBoard.appendChild(errorMessage);
 
+    let isValidPlacement = true;
+
+    for (let i = 0; i < shipSize; i++) {
         let currentX, currentY;
 
         if (!checkbox.checked) {
-            currentX = parseInt(x) + i;
-            currentY = parseInt(y);
+            if (parseInt(y) + shipSize > 10) {
+                isValidPlacement = false;
+                errorMessage.textContent = "Ship is too long, place it elsewhere";
+                errorMessage.style.cssText = "color: red; font-size: bold";
+                break; // Break out of the loop if there's an error
+            } else {
+                currentX = parseInt(x);
+                currentY = parseInt(y) + i;
+            }
         } else {
-            currentX = parseInt(x);
-            currentY = parseInt(y) + i;
+            if (parseInt(x) + shipSize > 10) {
+                isValidPlacement = false;
+                errorMessage.textContent = "Ship is too long, place it elsewhere";
+                errorMessage.style.cssText = "color: red; font-size: bold";
+                break; // Break out of the loop if there's an error
+            } else {
+                currentX = parseInt(x) + i;
+                currentY = parseInt(y);
+            }
         }
 
-        const currentBlock = document.querySelector(`.row[value="${currentY}"] .block[value="${currentX}"]`);
+        const currentBlock = document.querySelector(`.row[value="${currentX}"] .block[value="${currentY}"]`);
+        
+        // Check if the current block is already occupied
+        if (gameboard.board[currentX][currentY] !== null) {
+            isValidPlacement = false;
+            errorMessage.textContent = "Invalid placement, overlapping with another ship";
+            errorMessage.style.cssText = "color: red; font-size: bold";
+            break; // Break out of the loop if there's an error
+        }
+
         currentBlock.style.cssText = 'background-color: blue;';
-        gameboard.placeShip(ships[0], currentX, currentY, !checkbox.checked);
     }
 
-    ships.shift();
+    // If the placement is valid, place the ship on the gameboard
+    if (isValidPlacement) {
+        gameboard.placeShip(ships[0], parseInt(x), parseInt(y), checkbox.checked);
+        ships.shift();
+        if(ships.length === 0){
+            console.log("in");
+            setTimeout(() => { 
+                middleBoard.textContent = 'Ships are placed! You attack first';
+                setAttackPlatform(gameboard);
+            }, 1000);
+        }
+    }
 }
 
-function {
-    
+
+// Function that places ships on computers gameboard
+function computerPlaceShips(gameboard, ships) {
+    const shipsLength = ships.length;
+
+    for (let i = 0; i < shipsLength; i++) {
+        let x, y, isVertical;
+
+        do {
+            x = Math.floor(Math.random() * 10);
+            y = Math.floor(Math.random() * 10);
+            isVertical = getRandomBoolean();
+        } while (!isValidPlacement(gameboard, x, y, ships[i].length, isVertical));
+
+        gameboard.placeShip(ships[i], x, y, isVertical);
+    }
 }
+
+function isValidPlacement(gameboard, startX, startY, length, isVertical) {
+    const endX = isVertical ? startX + length - 1 : startX;
+    const endY = isVertical ? startY : startY + length - 1;
+
+    // If ship would be out of bounds
+    if (endX >= 10 || endY >= 10) {
+        return false;
+    }
+
+
+    // Checking for overlap
+    for (let i = startX; i <= endX; i++) {
+        for (let j = startY; j <= endY; j++) {
+            if (gameboard.board[i][j] !== null) {
+                return false;
+            }
+        }
+    }
+
+    // Checking if ship overlap when one is vertical and one horizontal
+    for (let i = startX; i <= endX; i++) {
+        for (let j = startY; j <= endY; j++) {
+            if (isVertical) {
+                if (j > 0 && gameboard.board[i][j - 1] !== null) {
+                    return false;
+                }
+                if (j < 9 && gameboard.board[i][j + 1] !== null) {
+                    return false;
+                }
+            } else {
+                if (i > 0 && gameboard.board[i - 1][j] !== null) {
+                    return false;
+                }
+                if (i < 9 && gameboard.board[i + 1][j] !== null) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+// Get a random boolean for random ship placement horizontal or vertical
+function getRandomBoolean(){
+    const randomValue = Math.random();
+
+    const threshold = 0.5;
+
+    return randomValue > threshold;
+}
+
+function setAttackPlatform(gameboard) {
+    const computerGameboard = document.getElementById('gameboard2');
+    const blocks = computerGameboard.querySelectorAll('.block');
+ 
+    blocks.forEach((block) => {
+        block.addEventListener('click', () => {
+            playerAttack(gameboard, block.parentNode.getAttribute('value'), block.getAttribute('value'))
+        });
+    });
+}
+
+function playerAttack(gameboard, x, y){
+     gameboard.recieveAttack(x,y);
+}
+
+

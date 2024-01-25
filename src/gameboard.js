@@ -5,22 +5,22 @@ class Gameboard {
         this.ships = [];
     }
 
-    placeShip(ship, x, y, isHorizantal){
+    placeShip(ship, x, y, isVertical){
         this.ships.push(ship);
-        if(isHorizantal === true){
-            for(let i = 0; i < ship.length; i++){
-                this.board[x][y] = ship;
-                y += 1;
-            }
-        } else {
+        if(isVertical === true){
             for(let i = 0; i < ship.length; i++){
                 this.board[x][y] = ship;
                 x += 1;
             }
+        } else {
+            for(let i = 0; i < ship.length; i++){
+                this.board[x][y] = ship;
+                y += 1;
+            }
         }
     }
 
-    recieveAttack(x, y, currentPlayer){
+    recieveAttack(x, y){
         if(this.board[x][y] !== 1 && this.board[x][y] !== 0){
             // If ship is hit
             if (this.board[x][y] !== null){
@@ -34,21 +34,12 @@ class Gameboard {
                     return "Ship is destroyed";
                 }
                 this.board[x][y] = 1; // Mark with 1 if its a hit
+                return true;
             } else {
                 this.board[x][y] = 0; // Mark with 0 if its a miss
-                this.Player(currentPlayer);
             }
         }
         return false;
-    }
-
-    Player(currentPlayer){
-        if(currentPlayer === "computer"){
-            this.recieveAttack(0, 1, "player");
-        }else{
-            //recieveAttack(, , "computer")
-            this.recieveAttack(0, 1, "computer");
-        }
     }
 }
 
