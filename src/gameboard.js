@@ -20,7 +20,7 @@ class Gameboard {
         }
     }
 
-    recieveAttack(x, y){
+    receiveAttack(x, y){
         if(this.board[x][y] !== 1 && this.board[x][y] !== 0){
             // If ship is hit
             if (this.board[x][y] !== null){
@@ -34,12 +34,13 @@ class Gameboard {
                     return "Ship is destroyed";
                 }
                 this.board[x][y] = 1; // Mark with 1 if its a hit
-                return true;
+                return 1;
             } else {
                 this.board[x][y] = 0; // Mark with 0 if its a miss
+                return 0;
             }
         }
-        return false;
+        return 2;
     }
 }
 

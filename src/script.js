@@ -2,13 +2,14 @@ import _, { forEach } from 'lodash';
 import { Ship } from "./ship";
 import { Gameboard } from './gameboard';
 
-
+let playerGameboard;
+let computerGameboard;
 const playButton = document.getElementById('playB');
 
 // When play button clicked -> create 2 gameboards;
 playButton.addEventListener("click", () =>{
-    const playerGameboard = new Gameboard();
-    const computerGameboard = new Gameboard();
+    playerGameboard  = new Gameboard();
+    computerGameboard  = new Gameboard();
 
     const instructions = document.getElementById('instructions');
     // Remove play button
@@ -46,6 +47,11 @@ function createGameboard(gameboard, number) {
         checkbox.setAttribute('id', 'checkbox');
         middleBoard.appendChild(messageVertical);
         messageVertical.appendChild(checkbox);
+
+        const message = document.createElement('p');
+        message.textContent = "Place ships on the gameboard";
+        middleBoard.appendChild(message);
+
 
         gameboardContainer.appendChild(middleBoard);
         ships = createShips();
@@ -93,12 +99,6 @@ function createShips(){
 function placeShips(block, gameboard, ships) {
     const middleBoard = document.getElementById('middleBoard');
     const errorMessage = document.createElement('p');
-
-    if (middleBoard.childNodes.length <= 2) {
-        const message = document.createElement('p');
-        message.textContent = "Place ships on the gameboard";
-        middleBoard.appendChild(message);
-    }
 
     const x = block.parentNode.getAttribute('value');
     const y = block.getAttribute('value');
@@ -156,10 +156,9 @@ function placeShips(block, gameboard, ships) {
         gameboard.placeShip(ships[0], parseInt(x), parseInt(y), checkbox.checked);
         ships.shift();
         if(ships.length === 0){
-            console.log("in");
             setTimeout(() => { 
                 middleBoard.textContent = 'Ships are placed! You attack first';
-                setAttackPlatform(gameboard);
+                setAttackPlatform(true);
             }, 1000);
         }
     }
@@ -235,19 +234,73 @@ function getRandomBoolean(){
     return randomValue > threshold;
 }
 
-function setAttackPlatform(gameboard) {
-    const computerGameboard = document.getElementById('gameboard2');
-    const blocks = computerGameboard.querySelectorAll('.block');
- 
+function setAttackPlatform(playerTurn) {
+    if (playerTurn) {
+        console.log("player")
+        setupPlayerAttack();
+    } else {
+        console.log("computer")
+        performComputerAttack();
+    }
+}
+
+function setupPlayerAttack() {
+    const gameboardContainer = document.getElementById('gameboard2');
+    const blocks = gameboardContainer.querySelectorAll('.block');
     blocks.forEach((block) => {
         block.addEventListener('click', () => {
-            playerAttack(gameboard, block.parentNode.getAttribute('value'), block.getAttribute('value'))
+            const x = block.parentNode.getAttribute('value');
+            const y = block.getAttribute('value');
+            console.log("CLICKED")
+            playerAttack(gameboardContainer, computerGameboard, x, y);
         });
     });
 }
 
-function playerAttack(gameboard, x, y){
-     gameboard.recieveAttack(x,y);
+function performComputerAttack() {
+    const gameboardContainer = document.getElementById('gameboard1');
+
+    const x = Math.floor(Math.random() * 10);
+    const y = Math.floor(Math.random() * 10);
+    computerAttack(gameboardContainer, playerGameboard, x, y);
 }
+
+function playerAttack(gameboardContainer, gameboard, x, y) {
+    const row = gameboardContainer.querySelector(`.row[value='${x}']`);
+    const block = row.querySelector(`.block[value='${y}']`);
+    const attackResult = gameboard.receiveAttack(x, y);
+    
+    if (attackResult === 0 || attackResult === 2) {
+        console.log("player miss")
+        block.style.backgroundColor = 'red'; 
+        block.textContent = '';
+        setAttackPlatform(false);
+    } else if (attackResult === 1 ) {
+        console.log("player hit")
+        block.textContent = 'X'; 
+        setAttackPlatform(true);
+    }
+}
+
+function computerAttack(gameboardContainer, gameboard, x, y) {
+    const row = gameboardContainer.querySelector(`.row[value='${x}']`);
+    const block = row.querySelector(`.block[value='${y}']`);
+    const attackResult = gameboard.receiveAttack(x, y);
+
+    if (attackResult === 0 || attackResult === 2) {
+        console.log(attackResult);
+        console.log("block", block);
+        block.style.backgroundColor = 'red'; 
+        block.textContent = '';
+        console.log("computer miss")
+        setAttackPlatform(true);
+    } else if (attackResult === 1 ) {
+        console.log("computer hit")
+        block.style.backgroundColor = 'white';
+        block.textContent = 'X'; 
+        setAttackPlatform(false);
+    }
+}
+
 
 
