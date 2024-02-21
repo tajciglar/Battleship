@@ -21,6 +21,7 @@ class Gameboard {
     }
 
     receiveAttack(x, y){
+        console.log(this.board[x][y])
         if(this.board[x][y] !== 1 && this.board[x][y] !== 0){
             // If ship is hit
             if (this.board[x][y] !== null){
@@ -28,10 +29,6 @@ class Gameboard {
                 if (this.board[x][y].sunken === true){
                     this.board[x][y] = 1;
                     this.ships.pop(); // Remove a ship from the array of ships
-                    if(this.ships.length === 0){
-                        return "All ship sunken";
-                    }
-                    return "Ship is destroyed";
                 }
                 this.board[x][y] = 1; // Mark with 1 if its a hit
                 return 1;

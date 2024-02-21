@@ -158,12 +158,12 @@ function placeShips(block, gameboard, ships) {
         if(ships.length === 0){
             setTimeout(() => { 
                 middleBoard.textContent = 'Ships are placed! You attack first';
+                console.log(playerGameboard, computerGameboard);
                 setAttackPlatform(true);
             }, 1000);
         }
     }
 }
-
 
 // Function that places ships on computers gameboard
 function computerPlaceShips(gameboard, ships) {
@@ -236,10 +236,8 @@ function getRandomBoolean(){
 
 function setAttackPlatform(playerTurn) {
     if (playerTurn) {
-        console.log("player")
         setupPlayerAttack();
     } else {
-        console.log("computer")
         performComputerAttack();
     }
 }
@@ -251,7 +249,8 @@ function setupPlayerAttack() {
         block.addEventListener('click', () => {
             const x = block.parentNode.getAttribute('value');
             const y = block.getAttribute('value');
-            console.log("CLICKED")
+            console.log(block);
+            console.log(x, y);
             playerAttack(gameboardContainer, computerGameboard, x, y);
         });
     });
@@ -270,14 +269,18 @@ function playerAttack(gameboardContainer, gameboard, x, y) {
     const block = row.querySelector(`.block[value='${y}']`);
     const attackResult = gameboard.receiveAttack(x, y);
     
-    if (attackResult === 0 || attackResult === 2) {
-        console.log("player miss")
+    if (attackResult === 0) {
         block.style.backgroundColor = 'red'; 
         block.textContent = '';
         setAttackPlatform(false);
     } else if (attackResult === 1 ) {
-        console.log("player hit")
         block.textContent = 'X'; 
+        console.log()
+        if(gameboard.ships.length === 0){
+            setTimeout(()=>{
+                winScreen('player');
+            }, 1000)
+        }
         setAttackPlatform(true);
     }
 }
@@ -287,18 +290,28 @@ function computerAttack(gameboardContainer, gameboard, x, y) {
     const block = row.querySelector(`.block[value='${y}']`);
     const attackResult = gameboard.receiveAttack(x, y);
 
-    if (attackResult === 0 || attackResult === 2) {
-        console.log(attackResult);
-        console.log("block", block);
+    if (attackResult === 0) {
         block.style.backgroundColor = 'red'; 
         block.textContent = '';
-        console.log("computer miss")
         setAttackPlatform(true);
     } else if (attackResult === 1 ) {
-        console.log("computer hit")
         block.style.backgroundColor = 'white';
-        block.textContent = 'X'; 
+        block.textContent = 'X';
+        if(gameboard.ships.length === 0){
+            setTimeout(()=>{
+                winScreen('computer');
+            }, 1000)
+            
+        }
         setAttackPlatform(false);
+    }
+}
+
+function winScreen(winner){
+    if(winner === 'computer'){
+        alert("Computer won!")
+    } else {
+        alert("Player won!")
     }
 }
 
